@@ -84,21 +84,36 @@ class MLPClassifier(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+# Se incorporaron capas Batch Normalization para mejorar la estabilidad del
+# entrenamiento y favorecer la convergencia del modelo, manteniendo una
+# arquitectura liviana inspirada en AlexNet.
+
+#Modificada para 3_CNN
 class CNNClassifier(nn.Module):
-    def __init__(self, input_size, dropout = 0.0, num_classes=10):
+    def __init__(self, input_size, dropout=0.0, num_classes=10):
         super().__init__()
+
         self.model = nn.Sequential(
-            nn.Conv2d(3,16,3, padding = 1, padding_mode = "reflect"),
-            nn.Dropout(dropout),
+
+            # Bloque convolucional 1
+            nn.Conv2d(3, 16, 3, padding=1, padding_mode="reflect"),
+            nn.BatchNorm2d(16),              # Batch Normalization
             nn.ReLU(),
-            nn.MaxPool2d(2,2),
-            nn.Conv2d(16,32,3, padding = 1, padding_mode = "reflect"),
             nn.Dropout(dropout),
+            nn.MaxPool2d(2, 2),
+
+            # Bloque convolucional 2
+            nn.Conv2d(16, 32, 3, padding=1, padding_mode="reflect"),
+            nn.BatchNorm2d(32),              # Batch Normalization
             nn.ReLU(),
-            nn.MaxPool2d(2,2),
+            nn.Dropout(dropout),
+            nn.MaxPool2d(2, 2),
+
+            # Clasificador
             nn.Flatten(),
-            nn.Linear((input_size//4)**2*32, 128),
+            nn.Linear((input_size // 4) ** 2 * 32, 128),
             nn.ReLU(),
+            nn.Dropout(dropout),
             nn.Linear(128, num_classes)
         )
 
